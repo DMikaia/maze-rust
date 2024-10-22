@@ -1,4 +1,3 @@
-use rand::prelude::*; // This imports all the necessary traits, including IteratorRandom
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
@@ -67,13 +66,4 @@ impl Maze {
     pub fn in_bounds(&self, x: usize, y: usize) -> bool {
         x < self.width && y < self.height
     }
-
-    // pub fn print_maze(&self) {
-    //     for row in &self.grid {
-    //         for &cell in row {
-    //             print!("{} ", if cell { " " } else { "#" });
-    //         }
-    //         println!();
-    //     }
-    // }
 }

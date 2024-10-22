@@ -1,6 +1,6 @@
 mod bot;
-mod dfs;
 mod maze;
+mod solver;
 
 use maze::Maze;
 
@@ -11,7 +11,7 @@ fn main() {
 
     let coordinates = maze.generate_maze(0, 0);
 
-    if let Some(path) = maze.solve_maze(coordinates[0], coordinates[1]) {
+    if let Some(path) = maze.dfs(coordinates[0], coordinates[1]) {
         maze.animate_solution(path);
     } else {
         print!("Error");

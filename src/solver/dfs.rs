@@ -5,7 +5,7 @@ impl Maze {
         x < self.width && y < self.height && self.grid[y][x]
     }
 
-    pub fn solve_maze(
+    pub fn dfs(
         &mut self,
         start: (usize, usize),
         end: (usize, usize),
