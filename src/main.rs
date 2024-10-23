@@ -2,6 +2,9 @@ mod bot;
 mod maze;
 mod model;
 mod solver;
+mod view;
+
+use std::io::stdin;
 
 use maze::Maze;
 use model::game::Game;
@@ -20,10 +23,19 @@ fn main() -> Result<(), String> {
     //     print!("Error");
     // }
 
+    print!("Enter the number of  cells: ");
+    let mut input: String = String::new();
+
+    stdin()
+        .read_line(&mut input)
+        .expect("Failed to read line !");
+
+    let cell: u32 = input.trim().parse().expect("The value must be a number !");
+
     let screen_size: (u32, u32) = (800, 600);
     let sdl_context = init()?;
 
-    let mut game: Result<Game, String> = Game::new(&sdl_context, screen_size);
+    let mut game: Result<Game, String> = Game::new(cell, &sdl_context, screen_size);
 
     Ok(())
 }

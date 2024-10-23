@@ -1,12 +1,18 @@
-use sdl2::{render::Canvas, video::Window, EventPump};
+use crate::view::board::Renderer;
+use sdl2::{pixels::Color, rect::Rect, render::Canvas, video::Window, EventPump};
 
 pub struct Game {
     pub canvas: Canvas<Window>,
     pub event_queue: EventPump,
+    pub cell: u32,
 }
 
 impl Game {
-    pub fn new(sdl_context: &sdl2::Sdl, screen_size: (u32, u32)) -> Result<Self, String> {
+    pub fn new(
+        cell: u32,
+        sdl_context: &sdl2::Sdl,
+        screen_size: (u32, u32),
+    ) -> Result<Self, String> {
         let video_subsystem = sdl_context.video()?;
 
         let window = video_subsystem
@@ -17,15 +23,15 @@ impl Game {
 
         let canvas = window.into_canvas().build().map_err(|e| e.to_string())?;
 
-        // let renderer = Renderer::new(
-        //     Rect::new(0, 0, screen_size.0, screen_size.1),
-        //     Color::RGB(26, 171, 252),
-        //     &texture_loader,
-        // );
+        let renderer = Renderer::new(
+            Color::RGB(216, 200, 150),
+            Rect::new(0, 0, screen_size.0, screen_size.1),
+        );
 
         let event_queue = sdl_context.event_pump()?;
 
         Ok(Game {
+            cell,
             canvas,
             event_queue,
         })
