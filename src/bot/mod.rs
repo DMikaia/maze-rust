@@ -22,8 +22,8 @@ impl Maze {
     }
 
     pub fn print_with_bot(&self, bot_position: (usize, usize)) {
-        for y in 0..self.height {
-            for x in 0..self.width {
+        for y in 0..self.size {
+            for x in 0..self.size {
                 if bot_position == (x, y) {
                     print!("O");
                 } else if self.grid[y][x] {

@@ -2,7 +2,7 @@ use crate::Maze;
 
 impl Maze {
     pub fn check_solver_cell(&self, x: usize, y: usize) -> bool {
-        x < self.width && y < self.height && self.grid[y][x]
+        x < self.size && y < self.size && self.grid[y][x]
     }
 
     fn check_neighbors(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
@@ -55,7 +55,7 @@ impl Maze {
         start: (usize, usize),
         end: (usize, usize),
     ) -> Option<Vec<(usize, usize)>> {
-        self.visited = vec![vec![false; self.width]; self.height];
+        self.visited = vec![vec![false; self.size]; self.size];
         let mut path = Vec::new();
 
         if self.dfs(start.0, start.1, end.0, end.1, &mut path) {

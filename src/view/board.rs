@@ -1,4 +1,4 @@
-use crate::utils::drawing_params::DrawingParams;
+use crate::{model::maze::Maze, utils::drawing_params::DrawingParams};
 
 use super::line::LineDrawer;
 use sdl2::{pixels::Color, rect::Rect, render::Canvas, video::Window};
@@ -16,17 +16,16 @@ impl Renderer {
         }
     }
 
-    pub fn render(&self, canvas: &mut Canvas<Window>, cell: i32) {
-        // Set the background color and fill the canvas
-        canvas.set_draw_color(self.base_color);
-        canvas.fill_rect(self.screen_area).ok().unwrap_or_default();
+    pub fn render_board(&self, canvas: &mut Canvas<Window>, cell_count: i32, maze: &Maze) {
+        let screen_width = self.screen_area.width() as i32;
+        let screen_height = self.screen_area.height() as i32;
 
-        let params = DrawingParams::new(
-            (self.screen_area.w / cell, self.screen_area.h / cell),
-            (self.screen_area.w, self.screen_area.h),
-        );
+        // Calculate the maximum cell size that fits the screen dimensions
+        let cell_width = screen_width / cell_count;
+        let cell_height = screen_height / cell_count;
 
-        // Draw the lines (via the LineDrawer trait implementation)
-        self.draw_lines(canvas, &params, cell);
+        let params = DrawingParams::new((cell_width, cell_height), (screen_width, screen_height));
+
+        self.draw_maze(canvas, &params, maze);
     }
 }

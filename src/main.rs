@@ -1,15 +1,12 @@
 mod bot;
-mod maze;
 mod model;
 mod solver;
 mod utils;
 mod view;
 
-use std::io::stdin;
-
-use maze::Maze;
-use model::game::Game;
+use model::{game::Game, maze::Maze};
 use sdl2::init;
+use std::io::stdin;
 
 fn main() -> Result<(), String> {
     // let mut maze: Maze = Maze::new(25, 25);
