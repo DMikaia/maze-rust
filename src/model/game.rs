@@ -1,10 +1,11 @@
 use crate::view::board::Renderer;
-use sdl2::{pixels::Color, rect::Rect, render::Canvas, video::Window, EventPump};
+use sdl2::{event::Event, pixels::Color, rect::Rect, render::Canvas, video::Window, EventPump};
 
 pub struct Game {
     pub canvas: Canvas<Window>,
-    pub event_queue: EventPump,
     pub cell: u32,
+    pub event_queue: EventPump,
+    pub renderer: Renderer,
 }
 
 impl Game {
@@ -34,6 +35,28 @@ impl Game {
             cell,
             canvas,
             event_queue,
+            renderer,
         })
+    }
+
+    pub fn run(&mut self) -> Result<(), String> {
+        let mut running = true;
+
+        while running {
+            self.process_events(&mut running);
+            self.renderer.render(&mut self.canvas, self.cell as i32);
+            self.canvas.present();
+        }
+
+        Ok(())
+    }
+
+    fn process_events(&mut self, running: &mut bool) {
+        for event in self.event_queue.poll_iter() {
+            match event {
+                Event::Quit { .. } => *running = false,
+                _ => {}
+            }
+        }
     }
 }

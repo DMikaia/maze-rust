@@ -2,6 +2,7 @@ mod bot;
 mod maze;
 mod model;
 mod solver;
+mod utils;
 mod view;
 
 use std::io::stdin;
@@ -23,7 +24,7 @@ fn main() -> Result<(), String> {
     //     print!("Error");
     // }
 
-    print!("Enter the number of  cells: ");
+    println!("Enter the number of  cells: ");
     let mut input: String = String::new();
 
     stdin()
@@ -35,7 +36,7 @@ fn main() -> Result<(), String> {
     let screen_size: (u32, u32) = (800, 600);
     let sdl_context = init()?;
 
-    let mut game: Result<Game, String> = Game::new(cell, &sdl_context, screen_size);
+    let mut game: Game = Game::new(cell, &sdl_context, screen_size)?;
 
-    Ok(())
+    game.run()
 }
