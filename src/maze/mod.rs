@@ -20,7 +20,7 @@ impl Maze {
         }
     }
 
-    pub fn check_neighbors(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
+    fn check_neighbors_pair(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
         let mut neighbors = Vec::new();
         let directions: [(isize, isize); 4] = [(0, 2), (0, -2), (2, 0), (-2, 0)];
 
@@ -42,7 +42,7 @@ impl Maze {
         self.grid[start_y][start_x] = true;
 
         while let Some((x, y)) = self.stack.last().copied() {
-            let neighbors = self.check_neighbors(x, y);
+            let neighbors = self.check_neighbors_pair(x, y);
             if let Some(&(nx, ny)) = neighbors.first() {
                 let mid_x = (x + nx) / 2;
                 let mid_y = (y + ny) / 2;

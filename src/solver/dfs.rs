@@ -5,52 +5,63 @@ impl Maze {
         x < self.width && y < self.height && self.grid[y][x]
     }
 
+    fn check_neighbors(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
+        let mut neighbors = Vec::new();
+        let directions: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
+
+        for (dx, dy) in directions.iter() {
+            let nx = (x as isize + dx) as usize;
+            let ny = (y as isize + dy) as usize;
+            if self.in_bounds(nx, ny) && self.check_solver_cell(nx, ny) {
+                neighbors.push((nx, ny));
+            }
+        }
+
+        neighbors
+    }
+
     pub fn dfs(
+        &mut self,
+        x: usize,
+        y: usize,
+        end_x: usize,
+        end_y: usize,
+        path: &mut Vec<(usize, usize)>,
+    ) -> bool {
+        if !self.check_solver_cell(x, y) || self.visited[y][x] {
+            return false;
+        }
+
+        self.visited[y][x] = true;
+        path.push((x, y));
+
+        if (x, y) == (end_x, end_y) {
+            return true;
+        }
+
+        let neighbors = self.check_neighbors(x, y);
+        for (new_x, new_y) in neighbors {
+            if self.dfs(new_x, new_y, end_x, end_y, path) {
+                return true;
+            }
+        }
+
+        path.pop();
+        false
+    }
+
+    pub fn solve_maze(
         &mut self,
         start: (usize, usize),
         end: (usize, usize),
     ) -> Option<Vec<(usize, usize)>> {
-        let mut stack: Vec<(usize, usize)> = Vec::new();
-        let mut visited: Vec<Vec<bool>> = vec![vec![false; self.width]; self.height];
-        let mut path: Vec<(usize, usize)> = Vec::new();
+        self.visited = vec![vec![false; self.width]; self.height];
+        let mut path = Vec::new();
 
-        stack.push(start);
-
-        while let Some((x, y)) = stack.pop() {
-            if (x, y) == end {
-                path.push((x, y));
-                return Some(path);
-            }
-
-            if !visited[y][x] {
-                visited[y][x] = true;
-                path.push((x, y));
-
-                let mut valid_neighbors = Vec::new();
-                for (dx, dy) in &[(0, 1), (1, 0), (0, -1), (-1, 0)] {
-                    let new_x = (x as isize + dx) as usize;
-                    let new_y = (y as isize + dy) as usize;
-
-                    if self.in_bounds(new_x, new_y)
-                        && self.check_solver_cell(new_x, new_y)
-                        && !visited[new_y][new_x]
-                    {
-                        valid_neighbors.push((new_x, new_y));
-                    }
-                }
-
-                valid_neighbors.sort_by_key(|&(nx, ny)| {
-                    (nx as isize - end.0 as isize).abs() + (ny as isize - end.1 as isize).abs()
-                });
-
-                for neighbor in valid_neighbors.into_iter().rev() {
-                    stack.push(neighbor);
-                }
-            } else {
-                path.pop();
-            }
+        if self.dfs(start.0, start.1, end.0, end.1, &mut path) {
+            Some(path)
+        } else {
+            None
         }
-
-        None
     }
 }
