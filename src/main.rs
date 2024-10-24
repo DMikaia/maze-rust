@@ -21,19 +21,12 @@ fn main() -> Result<(), String> {
     //     print!("Error");
     // }
 
-    println!("Enter the number of  cells: ");
-    let mut input: String = String::new();
-
-    stdin()
-        .read_line(&mut input)
-        .expect("Failed to read line !");
-
-    let cell: u32 = input.trim().parse().expect("The value must be a number !");
-
     let screen_size: (u32, u32) = (800, 600);
     let sdl_context = init()?;
 
-    let mut game: Game = Game::new(cell, &sdl_context, screen_size)?;
+    let mut game: Game = Game::new(11, &sdl_context, screen_size)?;
 
-    game.run()
+    // game.run()
+
+    Ok(())
 }

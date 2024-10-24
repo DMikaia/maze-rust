@@ -1,75 +1,52 @@
+use super::cell::Cell;
+use crate::view::canvas::GameCanvas;
 use rand::{seq::SliceRandom, thread_rng};
+use std::{cell::RefCell, rc::Rc};
 
 pub struct Maze {
+    pub grid: Vec<Cell>,
+    pub screen: (u32, u32),
     pub size: usize,
-    pub grid: Vec<Vec<bool>>,
-    pub visited: Vec<Vec<bool>>,
-    pub stack: Vec<(usize, usize)>,
 }
 
 impl Maze {
-    pub fn new(size: usize) -> Self {
-        Self {
-            size,
-            grid: vec![vec![false; size]; size],
-            visited: vec![vec![false; size]; size],
-            stack: Vec::new(),
-        }
-    }
+    pub fn new(size: usize, screen: (u32, u32), canvas: Rc<RefCell<GameCanvas>>) -> Self {
+        let grid: Vec<Cell> = (0..size * size)
+            .map(|i| {
+                let x = i % size;
+                let y = i / size;
+                Cell::new(x, y, Rc::clone(&canvas))
+            })
+            .collect();
 
-    fn check_neighbors_pair(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
-        let mut neighbors = Vec::new();
-        let directions: [(isize, isize); 4] = [(0, 2), (0, -2), (2, 0), (-2, 0)];
-
-        for (dx, dy) in directions.iter() {
-            let nx = (x as isize + dx) as usize;
-            let ny = (y as isize + dy) as usize;
-            if self.in_bounds(nx, ny) && !self.visited[ny][nx] {
-                neighbors.push((nx, ny));
-            }
-        }
-
-        neighbors.shuffle(&mut thread_rng());
-        neighbors
-    }
-
-    pub fn generate_maze_step(&mut self) -> bool {
-        if let Some((x, y)) = self.stack.last().copied() {
-            let neighbors = self.check_neighbors_pair(x, y);
-
-            if let Some(&(nx, ny)) = neighbors.first() {
-                let mid_x = (x + nx) / 2;
-                let mid_y = (y + ny) / 2;
-
-                if self.in_bounds(mid_x, mid_y) {
-                    self.grid[mid_y][mid_x] = true;
-                }
-
-                if self.in_bounds(ny, nx) {
-                    self.grid[ny][nx] = true;
-                    self.visited[ny][nx] = true;
-                    self.stack.push((nx, ny));
-                }
-            } else {
-                self.stack.pop();
-            }
-
-            return true;
-        }
-
-        false
+        Self { grid, screen, size }
     }
 
     pub fn in_bounds(&self, x: usize, y: usize) -> bool {
         x < self.size && y < self.size
     }
 
-    pub fn display_maze(&self) {
-        for i in self.grid.iter() {
-            for &j in i {
-                print!("{} ", if j { " " } else { "#" });
-            }
-            println!();
+    pub fn get_index(&self, x: usize, y: usize) -> usize {
+        x + y * self.size
+    }
+
+    pub fn remove_wall(current: &mut Cell, next: &mut Cell) {
+        let x_diff = (current.i - next.i) as isize;
+        if x_diff == 1 {
+            current.remove_cell_wall(3);
+            next.remove_cell_wall(1);
+        } else if x_diff == -1 {
+            current.remove_cell_wall(1);
+            next.remove_cell_wall(3);
+        }
+
+        let y_diff = (current.j - next.j) as isize;
+        if y_diff == 1 {
+            current.remove_cell_wall(0);
+            next.remove_cell_wall(2);
+        } else if y_diff == -1 {
+            current.remove_cell_wall(2);
+            next.remove_cell_wall(0);
         }
     }
 }

@@ -1,2 +1,2 @@
-pub mod board;
-pub mod line;
+pub mod canvas;
+pub mod renderer;

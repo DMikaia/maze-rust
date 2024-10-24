@@ -1,0 +1,44 @@
+use super::canvas::GameCanvas;
+use crate::{model::maze::Maze, utils::drawing_params::DrawingParams};
+use sdl2::{pixels::Color, rect::Rect, render::Canvas, video::Window};
+use std::{cell::RefCell, rc::Rc};
+
+pub struct Renderer {
+    base_color: Color,
+    screen_area: Rect,
+    game_canvas: Rc<RefCell<GameCanvas>>,
+    drawing_params: DrawingParams,
+}
+
+impl Renderer {
+    pub fn new(
+        base_color: Color,
+        screen_area: Rect,
+        cell_count: i32,
+        game_canvas: Rc<RefCell<GameCanvas>>,
+    ) -> Self {
+        let screen_width = screen_area.width() as i32;
+        let screen_height = screen_area.height() as i32;
+
+        // Calculate the maximum cell size that fits the screen dimensions
+        let cell_width = screen_width / cell_count;
+        let cell_height = screen_height / cell_count;
+
+        let drawing_params =
+            DrawingParams::new((cell_width, cell_height), (screen_width, screen_height));
+
+        Self {
+            base_color,
+            screen_area,
+            drawing_params,
+            game_canvas: Rc::clone(&game_canvas),
+        }
+    }
+
+    pub fn render_maze(&self, maze: &Maze) {
+        let mut game_canvas = self.game_canvas.borrow_mut();
+
+        game_canvas.canvas.set_draw_color(Color::RGB(11, 11, 5));
+        game_canvas.canvas.clear();
+    }
+}
