@@ -1,7 +1,13 @@
 use super::canvas::GameCanvas;
-use crate::{model::maze::Maze, utils::drawing_params::DrawingParams};
-use sdl2::{pixels::Color, rect::Rect, render::Canvas, video::Window};
-use std::{cell::RefCell, rc::Rc};
+use crate::{
+    model::{game, maze::Maze, state::GameState},
+    utils::drawing_params::DrawingParams,
+};
+use sdl2::{pixels::Color, rect::Rect};
+use std::{
+    cell::{RefCell, RefMut},
+    rc::Rc,
+};
 
 pub struct Renderer {
     base_color: Color,
@@ -24,7 +30,7 @@ impl Renderer {
         let cell_width = screen_width / cell_count;
         let cell_height = screen_height / cell_count;
 
-        let drawing_params =
+        let drawing_params: DrawingParams =
             DrawingParams::new((cell_width, cell_height), (screen_width, screen_height));
 
         Self {
@@ -35,10 +41,26 @@ impl Renderer {
         }
     }
 
-    pub fn render_maze(&self, maze: &Maze) {
-        let mut game_canvas = self.game_canvas.borrow_mut();
+    fn render_generations(&self, game_canvas: &mut GameCanvas, maze: &Maze) {
+        for cell in maze.grid.iter() {
+            cell.borrow()
+                .draw(game_canvas, &self.drawing_params, Color::RGB(247, 247, 237));
+        }
+    }
 
-        game_canvas.canvas.set_draw_color(Color::RGB(11, 11, 5));
+    pub fn render_maze(&self, maze: &Maze, state: &GameState) {
+        let mut game_canvas: RefMut<'_, GameCanvas> = self.game_canvas.borrow_mut();
+
+        game_canvas.canvas.set_draw_color(self.base_color);
         game_canvas.canvas.clear();
+
+        match state {
+            GameState::Generating => {
+                self.render_generations(&mut game_canvas, maze);
+            }
+            _ => {}
+        }
+
+        game_canvas.canvas.present();
     }
 }

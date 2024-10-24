@@ -1,16 +1,13 @@
+use super::{maze::Maze, state::GameState};
+use crate::view::{canvas::GameCanvas, renderer::Renderer};
+use sdl2::{event::Event, pixels::Color, rect::Rect, EventPump};
 use std::{cell::RefCell, rc::Rc, thread, time::Duration};
 
-use crate::view::{canvas::GameCanvas, renderer::Renderer};
-use sdl2::{event::Event, pixels::Color, rect::Rect, render::Canvas, video::Window, EventPump};
-
-use super::maze::Maze;
-
 pub struct Game {
-    pub cell: u32,
-    pub event_queue: EventPump,
-    pub game_canvas: Rc<RefCell<GameCanvas>>,
-    pub renderer: Renderer,
-    pub maze: Maze,
+    event_queue: EventPump,
+    renderer: Renderer,
+    maze: Maze,
+    state: GameState,
 }
 
 fn adjust_screen_size(screen_size: (u32, u32), cell: u32) -> (u32, u32) {
@@ -42,7 +39,7 @@ impl Game {
         )));
 
         let renderer = Renderer::new(
-            Color::RGB(216, 200, 150),
+            Color::RGB(11, 11, 5),
             Rect::new(0, 0, screen_width, screen_height),
             cell as i32,
             Rc::clone(&game_canvas),
@@ -50,46 +47,31 @@ impl Game {
 
         let event_queue = sdl_context.event_pump()?;
 
-        let maze = Maze::new(
-            cell as usize,
-            (screen_width, screen_height),
-            Rc::clone(&game_canvas),
-        );
+        let maze = Maze::new(cell as usize, (screen_width, screen_height));
 
         Ok(Game {
-            cell,
             event_queue,
-            game_canvas,
             renderer,
             maze,
+            state: GameState::Generating,
         })
     }
 
-    // pub fn run(&mut self) -> Result<(), String> {
-    //     let mut running = true;
-    //     let mut maze_generated = false;
+    pub fn run(&mut self) -> Result<(), String> {
+        let mut running = true;
 
-    //     self.maze.stack.push((0, 0));
-    //     self.maze.visited[0][0] = true;
-    //     self.maze.grid[0][0] = true;
+        self.maze.stack.push(self.maze.grid[0].clone());
+        self.maze.grid[0].borrow_mut().visited = true;
 
-    //     while running {
-    //         self.process_events(&mut running);
+        while running {
+            self.process_events(&mut running);
 
-    //         if !maze_generated {
-    //             maze_generated = !self.maze.generate_maze_step();
-    //         }
+            self.renderer.render_maze(&self.maze, &self.state);
+            thread::sleep(Duration::from_millis(25));
+        }
 
-    //         self.renderer
-    //             .render_board(&mut self.canvas, self.cell as i32, &self.maze);
-
-    //         self.canvas.present();
-
-    //         thread::sleep(Duration::from_millis(25));
-    //     }
-
-    //     Ok(())
-    // }
+        Ok(())
+    }
 
     fn process_events(&mut self, running: &mut bool) {
         for event in self.event_queue.poll_iter() {

@@ -26,7 +26,5 @@ fn main() -> Result<(), String> {
 
     let mut game: Game = Game::new(11, &sdl_context, screen_size)?;
 
-    // game.run()
-
-    Ok(())
+    game.run()
 }
