@@ -1,5 +1,6 @@
 use super::canvas::GameCanvas;
 use crate::{
+    helpers::color::colors,
     model::{game, maze::Maze, state::GameState},
     utils::drawing_params::DrawingParams,
 };
@@ -41,10 +42,18 @@ impl Renderer {
         }
     }
 
-    fn render_generations(&self, game_canvas: &mut GameCanvas, maze: &Maze) {
+    fn render_generation(&self, game_canvas: &mut GameCanvas, maze: &Maze) {
         for cell in maze.grid.iter() {
-            cell.borrow()
-                .draw(game_canvas, &self.drawing_params, Color::RGB(247, 247, 237));
+            let cell_ref = cell.borrow();
+            if let Some(current) = maze.stack.last() {
+                if Rc::ptr_eq(&cell, current) {
+                    cell_ref.highlight(game_canvas, &self.drawing_params, colors::HIGHLIGHT_COLOR);
+                } else {
+                    cell_ref.draw(game_canvas, &self.drawing_params, colors::WALL_COLOR);
+                }
+            } else {
+                cell_ref.draw(game_canvas, &self.drawing_params, colors::WALL_COLOR);
+            }
         }
     }
 
@@ -56,7 +65,7 @@ impl Renderer {
 
         match state {
             GameState::Generating => {
-                self.render_generations(&mut game_canvas, maze);
+                self.render_generation(&mut game_canvas, maze);
             }
             _ => {}
         }

@@ -1,11 +1,11 @@
+use crate::{
+    helpers::color::colors, utils::drawing_params::DrawingParams, view::canvas::GameCanvas,
+};
 use sdl2::{
     pixels::Color,
     rect::{Point, Rect},
-    render::Canvas,
 };
 use std::{cell::RefCell, rc::Rc};
-
-use crate::{utils::drawing_params::DrawingParams, view::canvas::GameCanvas};
 
 #[derive(Clone)]
 pub struct Cell {
@@ -41,6 +41,7 @@ impl Cell {
         );
 
         game_canvas.canvas.fill_rect(rect).ok().unwrap_or_default();
+        self.draw(game_canvas, drawing_params, colors::WALL_COLOR);
     }
 
     pub fn draw(&self, game_canvas: &mut GameCanvas, drawing_params: &DrawingParams, color: Color) {

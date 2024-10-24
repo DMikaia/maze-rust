@@ -1,4 +1,5 @@
 mod bot;
+mod helpers;
 mod model;
 mod solver;
 mod utils;
@@ -9,22 +10,20 @@ use sdl2::init;
 use std::io::stdin;
 
 fn main() -> Result<(), String> {
-    // let mut maze: Maze = Maze::new(25, 25);
+    println!("Enter the number of cell: ");
+    let mut input: String = String::new();
 
-    // println!("width: {}, height: {}", maze.width, maze.height);
+    stdin().read_line(&mut input).expect("Failed to read line");
 
-    // let coordinates = maze.generate_maze(0, 0);
-
-    // if let Some(path) = maze.solve_maze(coordinates[0], coordinates[1]) {
-    //     maze.animate_solution(path);
-    // } else {
-    //     print!("Error");
-    // }
+    let cell: u32 = input
+        .trim()
+        .parse()
+        .expect("Failed to parse input into u32");
 
     let screen_size: (u32, u32) = (800, 600);
     let sdl_context = init()?;
 
-    let mut game: Game = Game::new(11, &sdl_context, screen_size)?;
+    let mut game: Game = Game::new(cell, &sdl_context, screen_size)?;
 
     game.run()
 }

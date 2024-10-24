@@ -61,13 +61,21 @@ impl Game {
         let mut running = true;
 
         self.maze.stack.push(self.maze.grid[0].clone());
-        self.maze.grid[0].borrow_mut().visited = true;
 
         while running {
             self.process_events(&mut running);
 
+            match self.state {
+                GameState::Generating => {
+                    if !self.maze.generate() {
+                        self.state = GameState::Generating;
+                    }
+                }
+                _ => {}
+            }
+
             self.renderer.render_maze(&self.maze, &self.state);
-            thread::sleep(Duration::from_millis(25));
+            thread::sleep(Duration::from_millis(50));
         }
 
         Ok(())
