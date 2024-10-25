@@ -47,7 +47,7 @@ impl Game {
 
         let event_queue = sdl_context.event_pump()?;
 
-        let maze = Maze::new(cell as usize, (screen_width, screen_height));
+        let maze = Maze::new(cell as usize);
 
         Ok(Game {
             event_queue,

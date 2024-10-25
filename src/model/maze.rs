@@ -1,3 +1,5 @@
+use crate::helpers::position::in_bounds;
+
 use super::cell::Cell;
 use rand::{seq::SliceRandom, thread_rng};
 use std::{cell::RefCell, rc::Rc};
@@ -5,12 +7,11 @@ use std::{cell::RefCell, rc::Rc};
 pub struct Maze {
     pub grid: Vec<Rc<RefCell<Cell>>>,
     pub stack: Vec<Rc<RefCell<Cell>>>,
-    screen: (u32, u32),
     size: usize,
 }
 
 impl Maze {
-    pub fn new(size: usize, screen: (u32, u32)) -> Self {
+    pub fn new(size: usize) -> Self {
         let grid: Vec<Rc<RefCell<Cell>>> = (0..size * size)
             .map(|i| {
                 let x = i % size;
@@ -22,7 +23,6 @@ impl Maze {
         Self {
             grid,
             stack: Vec::with_capacity(size),
-            screen,
             size,
         }
     }
@@ -48,10 +48,6 @@ impl Maze {
         false
     }
 
-    fn in_bounds(&self, x: usize, y: usize) -> bool {
-        x < self.size && y < self.size
-    }
-
     fn get_index(&self, x: usize, y: usize) -> usize {
         x + y * self.size
     }
@@ -59,8 +55,9 @@ impl Maze {
     fn get_random_neighbor(&self, x: usize, y: usize) -> Option<Rc<RefCell<Cell>>> {
         let mut neighbors: Vec<Rc<RefCell<Cell>>> = Vec::new();
 
+        // Top neighbor
         if y as i32 - 1 >= 0 {
-            if self.in_bounds(x, y - 1) {
+            if in_bounds(self.size, (x, y - 1)) {
                 let top = self.grid[self.get_index(x, y - 1)].clone();
                 if !top.borrow().visited {
                     neighbors.push(top);
@@ -68,22 +65,25 @@ impl Maze {
             }
         }
 
-        if self.in_bounds(x + 1, y) {
+        // Right neighbor
+        if in_bounds(self.size, (x + 1, y)) {
             let right = self.grid[self.get_index(x + 1, y)].clone();
             if !right.borrow().visited {
                 neighbors.push(right);
             }
         }
 
-        if self.in_bounds(x, y + 1) {
+        // Bottom neighbor
+        if in_bounds(self.size, (x, y + 1)) {
             let down = self.grid[self.get_index(x, y + 1)].clone();
             if !down.borrow().visited {
                 neighbors.push(down);
             }
         }
 
+        // Left neighbor
         if x as i32 - 1 >= 0 {
-            if self.in_bounds(x - 1, y) {
+            if in_bounds(self.size, (x - 1, y)) {
                 let left = self.grid[self.get_index(x - 1, y)].clone();
                 if !left.borrow().visited {
                     neighbors.push(left);
