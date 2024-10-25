@@ -1,26 +1,9 @@
-use crate::helpers::position::in_bounds;
-use crate::view::cell::Cell;
+use super::Maze;
+use crate::{helpers::position::in_bounds, view::cell::Cell};
 use rand::{seq::SliceRandom, thread_rng};
 use std::{cell::RefCell, rc::Rc};
 
-pub struct Maze {
-    pub grid: Vec<Rc<RefCell<Cell>>>,
-    size: usize,
-}
-
 impl Maze {
-    pub fn new(size: usize) -> Self {
-        let grid: Vec<Rc<RefCell<Cell>>> = (0..size * size)
-            .map(|i| {
-                let x = i % size;
-                let y = i / size;
-                Cell::new(x, y)
-            })
-            .collect();
-
-        Self { grid, size }
-    }
-
     fn get_index(&self, x: usize, y: usize) -> usize {
         x + y * self.size
     }
@@ -65,26 +48,6 @@ impl Maze {
             Some(neighbors[0].clone())
         } else {
             None
-        }
-    }
-
-    pub fn remove_wall(&self, current: &mut Cell, next: &mut Cell) {
-        let x_diff = current.i as i32 - next.i as i32;
-        if x_diff == 1 {
-            current.remove_cell_wall(3);
-            next.remove_cell_wall(1);
-        } else if x_diff == -1 {
-            current.remove_cell_wall(1);
-            next.remove_cell_wall(3);
-        }
-
-        let y_diff = current.j as i32 - next.j as i32;
-        if y_diff == 1 {
-            current.remove_cell_wall(0);
-            next.remove_cell_wall(2);
-        } else if y_diff == -1 {
-            current.remove_cell_wall(2);
-            next.remove_cell_wall(0);
         }
     }
 }

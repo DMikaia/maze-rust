@@ -39,7 +39,7 @@ impl Renderer {
     pub fn render_generation(&self, maze: &Maze, generator: &dyn MazeGenerator) {
         let mut game_canvas = self.game_canvas.borrow_mut();
 
-        game_canvas.canvas.set_draw_color(colors::BACKGROUND_COLOR);
+        game_canvas.canvas.set_draw_color(self.base_color);
         game_canvas.canvas.clear();
 
         for cell in &maze.grid {

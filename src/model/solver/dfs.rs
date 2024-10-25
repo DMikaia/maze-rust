@@ -1,4 +1,19 @@
-use crate::Maze;
+use crate::view::cell::Cell;
+use std::{cell::RefCell, rc::Rc};
+
+pub struct DfsSolver {
+    pub path: Vec<Rc<RefCell<Cell>>>,
+    pub visited: Vec<bool>,
+}
+
+impl DfsSolver {
+    pub fn new(size: usize) -> Self {
+        Self {
+            path: Vec::new(),
+            visited: Vec::with_capacity(size),
+        }
+    }
+}
 
 // impl Maze {
 //     fn check_solver_cell(&self, x: usize, y: usize) -> bool {
