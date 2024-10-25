@@ -1,4 +1,4 @@
-use crate::{utils::drawing_params::DrawingParams, view::canvas::GameCanvas};
+use crate::view::canvas::GameCanvas;
 use sdl2::{
     pixels::Color,
     rect::{Point, Rect},
@@ -26,15 +26,15 @@ impl Cell {
     pub fn draw(
         &self,
         game_canvas: &mut GameCanvas,
-        drawing_params: &DrawingParams,
+        cell_size: (i32, i32),
         stroke: Color,
         fill: Color,
     ) {
         let rect = Rect::new(
-            (self.i as i32 * drawing_params.cell.0 as i32) as i32,
-            (self.j as i32 * drawing_params.cell.1 as i32) as i32,
-            drawing_params.cell.0 as u32,
-            drawing_params.cell.1 as u32,
+            (self.i as i32 * cell_size.0 as i32) as i32,
+            (self.j as i32 * cell_size.1 as i32) as i32,
+            cell_size.0 as u32,
+            cell_size.1 as u32,
         );
 
         // Set the fill color and fill the rectangle for the cell
@@ -43,8 +43,8 @@ impl Cell {
 
         // Set the stroke color for the walls
         game_canvas.canvas.set_draw_color(stroke);
-        let x = self.i as i32 * drawing_params.cell.0 as i32;
-        let y = self.j as i32 * drawing_params.cell.1 as i32;
+        let x = self.i as i32 * cell_size.0 as i32;
+        let y = self.j as i32 * cell_size.1 as i32;
 
         // Create a vector to hold the wall lines
         let mut wall_lines: Vec<(Point, Point)> = Vec::new();
@@ -52,40 +52,28 @@ impl Cell {
         // Check walls and add the corresponding lines to the vector
         if self.walls[0] && self.j > 0 {
             // Top wall
-            wall_lines.push((
-                Point::new(x, y),
-                Point::new(x + drawing_params.cell.0 as i32, y),
-            ));
+            wall_lines.push((Point::new(x, y), Point::new(x + cell_size.0 as i32, y)));
         }
 
         if self.walls[1] {
             // Right wall
             wall_lines.push((
-                Point::new(x + drawing_params.cell.0 as i32, y),
-                Point::new(
-                    x + drawing_params.cell.0 as i32,
-                    y + drawing_params.cell.1 as i32,
-                ),
+                Point::new(x + cell_size.0 as i32, y),
+                Point::new(x + cell_size.0 as i32, y + cell_size.1 as i32),
             ));
         }
 
         if self.walls[2] {
             // Bottom wall
             wall_lines.push((
-                Point::new(
-                    x + drawing_params.cell.0 as i32,
-                    y + drawing_params.cell.1 as i32,
-                ),
-                Point::new(x, y + drawing_params.cell.1 as i32),
+                Point::new(x + cell_size.0 as i32, y + cell_size.1 as i32),
+                Point::new(x, y + cell_size.1 as i32),
             ));
         }
 
         if self.walls[3] && self.i > 0 {
             // Left wall
-            wall_lines.push((
-                Point::new(x, y + drawing_params.cell.1 as i32),
-                Point::new(x, y),
-            ));
+            wall_lines.push((Point::new(x, y + cell_size.1 as i32), Point::new(x, y)));
         }
 
         // Draw all wall lines in a single pass

@@ -1,9 +1,8 @@
 mod helpers;
 mod model;
-mod utils;
 mod view;
 
-use model::{game::Game, maze::Maze};
+use model::game::Game;
 use sdl2::init;
 use std::io::stdin;
 

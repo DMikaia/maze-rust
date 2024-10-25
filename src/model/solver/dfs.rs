@@ -1,8 +1,4 @@
-use crate::{
-    helpers::position::in_bounds,
-    model::maze::{neighbor, Maze},
-    view::cell::Cell,
-};
+use crate::{model::maze::Maze, view::cell::Cell};
 use std::{cell::RefCell, rc::Rc};
 
 use super::traits::MazeSolver;

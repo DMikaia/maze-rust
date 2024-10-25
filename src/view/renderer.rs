@@ -1,18 +1,17 @@
-use super::{canvas::GameCanvas, cell::Cell};
+use super::canvas::GameCanvas;
 use crate::{
     helpers::color::colors,
     model::{
         generator::traits::MazeGenerator, maze::Maze, solver::traits::MazeSolver, state::GameState,
     },
-    utils::drawing_params::DrawingParams,
 };
 use sdl2::{pixels::Color, rect::Rect};
-use std::{cell::RefCell, path, rc::Rc};
+use std::{cell::RefCell, rc::Rc};
 
 pub struct Renderer {
     base_color: Color,
+    cell_size: (i32, i32),
     game_canvas: Rc<RefCell<GameCanvas>>,
-    drawing_params: DrawingParams,
 }
 
 impl Renderer {
@@ -28,12 +27,9 @@ impl Renderer {
         let cell_width = screen_width / cell_count;
         let cell_height = screen_height / cell_count;
 
-        let drawing_params: DrawingParams =
-            DrawingParams::new((cell_width, cell_height), (screen_width, screen_height));
-
         Self {
             base_color,
-            drawing_params,
+            cell_size: (cell_width, cell_height),
             game_canvas: Rc::clone(&game_canvas),
         }
     }
@@ -55,7 +51,7 @@ impl Renderer {
                     }
                 }
 
-                cell_ref.draw(&mut game_canvas, &self.drawing_params, stroke, fill);
+                cell_ref.draw(&mut game_canvas, self.cell_size, stroke, fill);
             }
         }
 
@@ -80,7 +76,7 @@ impl Renderer {
                     fill = colors::ACCENT;
                 }
 
-                cell_ref.draw(&mut game_canvas, &self.drawing_params, stroke, fill);
+                cell_ref.draw(&mut game_canvas, self.cell_size, stroke, fill);
             }
         }
 
