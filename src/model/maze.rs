@@ -1,8 +1,8 @@
-use crate::helpers::position::in_bounds;
+use crate::{helpers::position::in_bounds, view::renderer::Renderer};
 
 use super::cell::Cell;
 use rand::{seq::SliceRandom, thread_rng};
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, rc::Rc, thread, time::Duration};
 
 pub struct Maze {
     pub grid: Vec<Rc<RefCell<Cell>>>,
@@ -28,7 +28,9 @@ impl Maze {
     }
 
     pub fn generate(&mut self) -> bool {
-        if let Some(current) = self.stack.pop() {
+        while !self.stack.is_empty() {
+            let current = self.stack.pop().unwrap();
+
             let mut current_cell = current.borrow_mut();
             current_cell.set_visited();
 
@@ -38,11 +40,12 @@ impl Maze {
 
                 self.stack.push(current.clone());
                 self.remove_wall(&mut current_cell, &mut next_cell);
-
                 self.stack.push(next.clone());
-
-                return true;
+            } else {
+                self.stack.pop();
             }
+
+            return true;
         }
 
         false
@@ -52,41 +55,37 @@ impl Maze {
         x + y * self.size
     }
 
-    fn get_random_neighbor(&self, x: usize, y: usize) -> Option<Rc<RefCell<Cell>>> {
-        let mut neighbors: Vec<Rc<RefCell<Cell>>> = Vec::new();
+    fn get_all_neighbor_position(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
+        let mut points: Vec<(usize, usize)> = vec![];
 
         // Top neighbor
         if y as i32 - 1 >= 0 {
-            if in_bounds(self.size, (x, y - 1)) {
-                let top = self.grid[self.get_index(x, y - 1)].clone();
-                if !top.borrow().visited {
-                    neighbors.push(top);
-                }
-            }
+            points.push((x, y - 1));
         }
 
         // Right neighbor
-        if in_bounds(self.size, (x + 1, y)) {
-            let right = self.grid[self.get_index(x + 1, y)].clone();
-            if !right.borrow().visited {
-                neighbors.push(right);
-            }
-        }
+        points.push((x + 1, y));
 
         // Bottom neighbor
-        if in_bounds(self.size, (x, y + 1)) {
-            let down = self.grid[self.get_index(x, y + 1)].clone();
-            if !down.borrow().visited {
-                neighbors.push(down);
-            }
-        }
+        points.push((x, y + 1));
 
         // Left neighbor
         if x as i32 - 1 >= 0 {
-            if in_bounds(self.size, (x - 1, y)) {
-                let left = self.grid[self.get_index(x - 1, y)].clone();
-                if !left.borrow().visited {
-                    neighbors.push(left);
+            points.push((x - 1, y));
+        }
+
+        points
+    }
+
+    fn get_random_neighbor(&self, x: usize, y: usize) -> Option<Rc<RefCell<Cell>>> {
+        let mut neighbors: Vec<Rc<RefCell<Cell>>> = Vec::new();
+
+        for (c_x, c_y) in self.get_all_neighbor_position(x, y) {
+            if in_bounds(self.size, (c_x, c_y)) {
+                let current = self.grid[self.get_index(c_x, c_y)].clone();
+
+                if !current.borrow().visited {
+                    neighbors.push(current);
                 }
             }
         }

@@ -1,7 +1,15 @@
 use super::{maze::Maze, state::GameState};
-use crate::view::{canvas::GameCanvas, renderer::Renderer};
+use crate::{
+    helpers::color::colors,
+    view::{canvas::GameCanvas, renderer::Renderer},
+};
 use sdl2::{event::Event, pixels::Color, rect::Rect, EventPump};
-use std::{cell::RefCell, rc::Rc, thread, time::Duration};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+    thread,
+    time::{Duration, Instant},
+};
 
 pub struct Game {
     event_queue: EventPump,
@@ -39,7 +47,7 @@ impl Game {
         )));
 
         let renderer = Renderer::new(
-            Color::RGB(11, 11, 5),
+            colors::BACKGROUND_COLOR,
             Rect::new(0, 0, screen_width, screen_height),
             cell as i32,
             Rc::clone(&game_canvas),
@@ -68,14 +76,14 @@ impl Game {
             match self.state {
                 GameState::Generating => {
                     if !self.maze.generate() {
-                        self.state = GameState::Generating;
+                        self.state = GameState::Resolving;
                     }
                 }
                 _ => {}
             }
 
-            self.renderer.render_maze(&self.maze, &self.state);
-            thread::sleep(Duration::from_millis(50));
+            thread::sleep(Duration::from_millis(42));
+            self.renderer.render(&self.maze, &self.state);
         }
 
         Ok(())

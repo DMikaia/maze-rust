@@ -1,18 +1,19 @@
 use super::canvas::GameCanvas;
 use crate::{
     helpers::color::colors,
-    model::{game, maze::Maze, state::GameState},
+    model::{maze::Maze, state::GameState},
     utils::drawing_params::DrawingParams,
 };
 use sdl2::{pixels::Color, rect::Rect};
 use std::{
     cell::{RefCell, RefMut},
     rc::Rc,
+    thread,
+    time::Duration,
 };
 
 pub struct Renderer {
     base_color: Color,
-    screen_area: Rect,
     game_canvas: Rc<RefCell<GameCanvas>>,
     drawing_params: DrawingParams,
 }
@@ -27,7 +28,6 @@ impl Renderer {
         let screen_width = screen_area.width() as i32;
         let screen_height = screen_area.height() as i32;
 
-        // Calculate the maximum cell size that fits the screen dimensions
         let cell_width = screen_width / cell_count;
         let cell_height = screen_height / cell_count;
 
@@ -36,40 +36,39 @@ impl Renderer {
 
         Self {
             base_color,
-            screen_area,
             drawing_params,
             game_canvas: Rc::clone(&game_canvas),
         }
     }
 
-    fn render_generation(&self, game_canvas: &mut GameCanvas, maze: &Maze) {
-        for cell in maze.grid.iter() {
-            let cell_ref = cell.borrow();
-            if let Some(current) = maze.stack.last() {
-                if Rc::ptr_eq(&cell, current) {
-                    cell_ref.highlight(game_canvas, &self.drawing_params, colors::HIGHLIGHT_COLOR);
-                } else {
-                    cell_ref.draw(game_canvas, &self.drawing_params, colors::WALL_COLOR);
-                }
-            } else {
-                cell_ref.draw(game_canvas, &self.drawing_params, colors::WALL_COLOR);
-            }
-        }
-    }
+    pub fn render_generation(&self, maze: &Maze) {
+        let mut game_canvas = self.game_canvas.borrow_mut();
 
-    pub fn render_maze(&self, maze: &Maze, state: &GameState) {
-        let mut game_canvas: RefMut<'_, GameCanvas> = self.game_canvas.borrow_mut();
-
-        game_canvas.canvas.set_draw_color(self.base_color);
+        game_canvas.canvas.set_draw_color(colors::BACKGROUND_COLOR);
         game_canvas.canvas.clear();
 
-        match state {
-            GameState::Generating => {
-                self.render_generation(&mut game_canvas, maze);
+        for cell in &maze.grid {
+            if let Ok(cell_ref) = cell.try_borrow() {
+                let stroke = colors::FOREGROUND;
+                let mut fill = colors::BACKGROUND_COLOR;
+
+                if let Some(current) = maze.stack.last() {
+                    if Rc::ptr_eq(&cell, current) {
+                        fill = colors::PRIMARY_COLOR;
+                    }
+                }
+
+                cell_ref.draw(&mut game_canvas, &self.drawing_params, stroke, fill);
             }
-            _ => {}
         }
 
         game_canvas.canvas.present();
+    }
+
+    pub fn render(&self, maze: &Maze, state: &GameState) {
+        match state {
+            GameState::Generating => self.render_generation(maze),
+            _ => {}
+        }
     }
 }

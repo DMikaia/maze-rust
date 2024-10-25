@@ -1,9 +1,7 @@
-use sdl2::pixels::Color;
-
 pub mod colors {
     use sdl2::pixels::Color;
 
-    pub const BACKGROUND_COLOR: Color = Color::RGB(11, 11, 5);
-    pub const HIGHLIGHT_COLOR: Color = Color::RGB(180, 176, 65);
-    pub const WALL_COLOR: Color = Color::RGB(247, 247, 237);
+    pub const BACKGROUND_COLOR: Color = Color::RGB(2, 1, 4);
+    pub const PRIMARY_COLOR: Color = Color::RGB(83, 53, 182);
+    pub const FOREGROUND: Color = Color::RGB(232, 228, 241);
 }
