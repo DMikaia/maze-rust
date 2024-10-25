@@ -1,19 +1,19 @@
-use super::{maze::Maze, state::GameState};
+use super::{
+    generator::{dfs::DfsGenerator, traits::MazeGenerator},
+    maze::Maze,
+    state::GameState,
+};
 use crate::{
     helpers::color::colors,
     view::{canvas::GameCanvas, renderer::Renderer},
 };
-use sdl2::{event::Event, pixels::Color, rect::Rect, EventPump};
-use std::{
-    cell::RefCell,
-    rc::Rc,
-    thread,
-    time::{Duration, Instant},
-};
+use sdl2::{event::Event, rect::Rect, EventPump};
+use std::{cell::RefCell, rc::Rc, thread, time::Duration};
 
 pub struct Game {
     event_queue: EventPump,
     renderer: Renderer,
+    generator: Box<dyn MazeGenerator>,
     maze: Maze,
     state: GameState,
 }
@@ -57,9 +57,12 @@ impl Game {
 
         let maze = Maze::new(cell as usize);
 
+        let generator = Box::new(DfsGenerator::new(maze.grid[0].clone()));
+
         Ok(Game {
             event_queue,
             renderer,
+            generator,
             maze,
             state: GameState::Generating,
         })
@@ -68,14 +71,12 @@ impl Game {
     pub fn run(&mut self) -> Result<(), String> {
         let mut running = true;
 
-        self.maze.stack.push(self.maze.grid[0].clone());
-
         while running {
             self.process_events(&mut running);
 
             match self.state {
                 GameState::Generating => {
-                    if !self.maze.generate() {
+                    if !self.generator.generate(&self.maze) {
                         self.state = GameState::Resolving;
                     }
                 }

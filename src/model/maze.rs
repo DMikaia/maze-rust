@@ -1,8 +1,7 @@
-use crate::{helpers::position::in_bounds, view::renderer::Renderer};
-
 use super::cell::Cell;
+use crate::helpers::position::in_bounds;
 use rand::{seq::SliceRandom, thread_rng};
-use std::{cell::RefCell, rc::Rc, thread, time::Duration};
+use std::{cell::RefCell, rc::Rc};
 
 pub struct Maze {
     pub grid: Vec<Rc<RefCell<Cell>>>,
@@ -25,30 +24,6 @@ impl Maze {
             stack: Vec::with_capacity(size),
             size,
         }
-    }
-
-    pub fn generate(&mut self) -> bool {
-        while !self.stack.is_empty() {
-            let current = self.stack.pop().unwrap();
-
-            let mut current_cell = current.borrow_mut();
-            current_cell.set_visited();
-
-            if let Some(next) = self.get_random_neighbor(current_cell.i, current_cell.j) {
-                let mut next_cell = next.borrow_mut();
-                next_cell.set_visited();
-
-                self.stack.push(current.clone());
-                self.remove_wall(&mut current_cell, &mut next_cell);
-                self.stack.push(next.clone());
-            } else {
-                self.stack.pop();
-            }
-
-            return true;
-        }
-
-        false
     }
 
     fn get_index(&self, x: usize, y: usize) -> usize {
@@ -77,7 +52,7 @@ impl Maze {
         points
     }
 
-    fn get_random_neighbor(&self, x: usize, y: usize) -> Option<Rc<RefCell<Cell>>> {
+    pub fn get_random_neighbor(&self, x: usize, y: usize) -> Option<Rc<RefCell<Cell>>> {
         let mut neighbors: Vec<Rc<RefCell<Cell>>> = Vec::new();
 
         for (c_x, c_y) in self.get_all_neighbor_position(x, y) {
@@ -98,7 +73,7 @@ impl Maze {
         }
     }
 
-    fn remove_wall(&self, current: &mut Cell, next: &mut Cell) {
+    pub fn remove_wall(&self, current: &mut Cell, next: &mut Cell) {
         let x_diff = current.i as i32 - next.i as i32;
         if x_diff == 1 {
             current.remove_cell_wall(3);
