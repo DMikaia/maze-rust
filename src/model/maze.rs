@@ -1,5 +1,5 @@
-use super::cell::Cell;
 use crate::helpers::position::in_bounds;
+use crate::view::cell::Cell;
 use rand::{seq::SliceRandom, thread_rng};
 use std::{cell::RefCell, rc::Rc};
 

@@ -1,6 +1,4 @@
-use crate::{
-    helpers::color::colors, utils::drawing_params::DrawingParams, view::canvas::GameCanvas,
-};
+use crate::{utils::drawing_params::DrawingParams, view::canvas::GameCanvas};
 use sdl2::{
     pixels::Color,
     rect::{Point, Rect},

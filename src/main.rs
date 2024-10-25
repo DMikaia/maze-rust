@@ -1,7 +1,5 @@
-mod bot;
 mod helpers;
 mod model;
-mod solver;
 mod utils;
 mod view;
 

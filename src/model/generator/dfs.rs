@@ -1,5 +1,6 @@
 use super::traits::MazeGenerator;
-use crate::model::{cell::Cell, maze::Maze};
+use crate::model::maze::Maze;
+use crate::view::cell::Cell;
 use std::{cell::RefCell, rc::Rc};
 
 pub struct DfsGenerator {
