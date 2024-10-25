@@ -1,6 +1,7 @@
 use super::{
     generator::{dfs::DfsGenerator, traits::MazeGenerator},
     maze::Maze,
+    solver::{dfs::DfsSolver, traits::MazeSolver},
     state::GameState,
 };
 use crate::{
@@ -13,9 +14,10 @@ use std::{cell::RefCell, rc::Rc, thread, time::Duration};
 pub struct Game {
     event_queue: EventPump,
     renderer: Renderer,
-    generator: Box<dyn MazeGenerator>,
     maze: Maze,
+    generator: Box<dyn MazeGenerator>,
     state: GameState,
+    solver: Box<dyn MazeSolver>,
 }
 
 fn adjust_screen_size(screen_size: (u32, u32), cell: u32) -> (u32, u32) {
@@ -41,11 +43,12 @@ impl Game {
     ) -> Result<Self, String> {
         let (screen_width, screen_height) = adjust_screen_size(screen_size, cell);
 
+        let event_queue = sdl_context.event_pump()?;
+
         let game_canvas = Rc::new(RefCell::new(GameCanvas::new(
             sdl_context,
             (screen_width, screen_height),
         )));
-
         let renderer = Renderer::new(
             colors::BACKGROUND_COLOR,
             Rect::new(0, 0, screen_width, screen_height),
@@ -53,11 +56,9 @@ impl Game {
             Rc::clone(&game_canvas),
         );
 
-        let event_queue = sdl_context.event_pump()?;
-
         let maze = Maze::new(cell as usize);
-
         let generator = Box::new(DfsGenerator::new(maze.grid[0].clone()));
+        let solver = Box::new(DfsSolver::new(cell as usize));
 
         Ok(Game {
             event_queue,
@@ -65,6 +66,7 @@ impl Game {
             generator,
             maze,
             state: GameState::Generating,
+            solver,
         })
     }
 
@@ -80,6 +82,7 @@ impl Game {
                         self.state = GameState::Resolving;
                     }
                 }
+                GameState::Resolving => {}
                 _ => {}
             }
 

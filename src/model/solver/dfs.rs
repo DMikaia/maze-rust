@@ -1,5 +1,7 @@
-use crate::view::cell::Cell;
+use crate::{model::maze::Maze, view::cell::Cell};
 use std::{cell::RefCell, rc::Rc};
+
+use super::traits::MazeSolver;
 
 pub struct DfsSolver {
     pub path: Vec<Rc<RefCell<Cell>>>,
@@ -13,70 +15,49 @@ impl DfsSolver {
             visited: Vec::with_capacity(size),
         }
     }
+
+    fn dfs(&mut self, current: Rc<RefCell<Cell>>, end: (usize, usize), maze: &Maze) -> bool {
+        let (x, y) = (current.borrow().i, current.borrow().j);
+        let current_index = maze.get_index(x, y);
+
+        if self.visited[current_index] {
+            return false;
+        }
+
+        self.visited[current_index] = true;
+        self.path.push(current.clone());
+
+        if (x, y) == (end.0, end.1) {
+            return true;
+        }
+
+        let neighbors = maze.get_all_neighbor_position(x, y);
+        for (new_x, new_y) in neighbors {
+            let new_index = maze.get_index(new_x, new_y);
+            let new_neighbor = maze.grid[new_index].clone();
+
+            if self.dfs(new_neighbor, end, maze) {
+                return true;
+            }
+        }
+
+        self.path.pop();
+
+        false
+    }
 }
 
-// impl Maze {
-//     fn check_solver_cell(&self, x: usize, y: usize) -> bool {
-//         x < self.size && y < self.size && self.grid[y][x]
-//     }
-
-//     fn check_neighbor(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
-//         let mut neighbors = Vec::new();
-//         let directions: [(isize, isize); 4] = [(0, 1), (1, 0), (0, -1), (-1, 0)];
-
-//         for (dx, dy) in directions.iter() {
-//             let nx = (x as isize + dx) as usize;
-//             let ny = (y as isize + dy) as usize;
-//             if self.in_bounds(nx, ny) && self.check_solver_cell(nx, ny) {
-//                 neighbors.push((nx, ny));
-//             }
-//         }
-
-//         neighbors
-//     }
-
-//     fn dfs(
-//         &mut self,
-//         x: usize,
-//         y: usize,
-//         end_x: usize,
-//         end_y: usize,
-//         path: &mut Vec<(usize, usize)>,
-//     ) -> bool {
-//         if !self.check_solver_cell(x, y) || self.visited[y][x] {
-//             return false;
-//         }
-
-//         self.visited[y][x] = true;
-//         path.push((x, y));
-
-//         if (x, y) == (end_x, end_y) {
-//             return true;
-//         }
-
-//         let neighbors = self.check_neighbor(x, y);
-//         for (new_x, new_y) in neighbors {
-//             if self.dfs(new_x, new_y, end_x, end_y, path) {
-//                 return true;
-//             }
-//         }
-
-//         path.pop();
-//         false
-//     }
-
-//     pub fn solve_maze(
-//         &mut self,
-//         start: (usize, usize),
-//         end: (usize, usize),
-//     ) -> Option<Vec<(usize, usize)>> {
-//         self.visited = vec![vec![false; self.size]; self.size];
-//         let mut path = Vec::new();
-
-//         if self.dfs(start.0, start.1, end.0, end.1, &mut path) {
-//             Some(path)
-//         } else {
-//             None
-//         }
-//     }
-// }
+impl MazeSolver for DfsSolver {
+    fn solve(
+        &mut self,
+        start: Rc<RefCell<Cell>>,
+        end: (usize, usize),
+        maze: &Maze,
+    ) -> Option<Vec<Rc<RefCell<Cell>>>> {
+        if self.dfs(start.clone(), end, maze) {
+            Some(self.path.clone())
+        } else {
+            None
+        }
+    }
+}

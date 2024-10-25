@@ -4,11 +4,11 @@ use rand::{seq::SliceRandom, thread_rng};
 use std::{cell::RefCell, rc::Rc};
 
 impl Maze {
-    fn get_index(&self, x: usize, y: usize) -> usize {
+    pub fn get_index(&self, x: usize, y: usize) -> usize {
         x + y * self.size
     }
 
-    fn get_all_neighbor_position(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
+    pub fn get_all_neighbor_position(&self, x: usize, y: usize) -> Vec<(usize, usize)> {
         let mut points: Vec<(usize, usize)> = vec![];
 
         // Top neighbor
