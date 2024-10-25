@@ -40,4 +40,8 @@ impl MazeGenerator for DfsGenerator {
 
         false
     }
+
+    fn get_current_cell(&self) -> Option<Rc<RefCell<Cell>>> {
+        self.stack.last().cloned()
+    }
 }

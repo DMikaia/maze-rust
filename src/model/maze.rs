@@ -5,7 +5,6 @@ use std::{cell::RefCell, rc::Rc};
 
 pub struct Maze {
     pub grid: Vec<Rc<RefCell<Cell>>>,
-    pub stack: Vec<Rc<RefCell<Cell>>>,
     size: usize,
 }
 
@@ -19,11 +18,7 @@ impl Maze {
             })
             .collect();
 
-        Self {
-            grid,
-            stack: Vec::with_capacity(size),
-            size,
-        }
+        Self { grid, size }
     }
 
     fn get_index(&self, x: usize, y: usize) -> usize {

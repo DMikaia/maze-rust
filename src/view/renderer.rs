@@ -1,16 +1,11 @@
 use super::canvas::GameCanvas;
 use crate::{
     helpers::color::colors,
-    model::{maze::Maze, state::GameState},
+    model::{generator::traits::MazeGenerator, maze::Maze, state::GameState},
     utils::drawing_params::DrawingParams,
 };
 use sdl2::{pixels::Color, rect::Rect};
-use std::{
-    cell::{RefCell, RefMut},
-    rc::Rc,
-    thread,
-    time::Duration,
-};
+use std::{cell::RefCell, rc::Rc};
 
 pub struct Renderer {
     base_color: Color,
@@ -41,7 +36,7 @@ impl Renderer {
         }
     }
 
-    pub fn render_generation(&self, maze: &Maze) {
+    pub fn render_generation(&self, maze: &Maze, generator: &dyn MazeGenerator) {
         let mut game_canvas = self.game_canvas.borrow_mut();
 
         game_canvas.canvas.set_draw_color(colors::BACKGROUND_COLOR);
@@ -52,8 +47,8 @@ impl Renderer {
                 let stroke = colors::FOREGROUND;
                 let mut fill = colors::BACKGROUND_COLOR;
 
-                if let Some(current) = maze.stack.last() {
-                    if Rc::ptr_eq(&cell, current) {
+                if let Some(current) = generator.get_current_cell() {
+                    if Rc::ptr_eq(&cell, &current) {
                         fill = colors::PRIMARY_COLOR;
                     }
                 }
@@ -65,9 +60,9 @@ impl Renderer {
         game_canvas.canvas.present();
     }
 
-    pub fn render(&self, maze: &Maze, state: &GameState) {
+    pub fn render(&self, maze: &Maze, generator: &dyn MazeGenerator, state: &GameState) {
         match state {
-            GameState::Generating => self.render_generation(maze),
+            GameState::Generating => self.render_generation(maze, generator),
             _ => {}
         }
     }

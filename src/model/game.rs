@@ -84,7 +84,8 @@ impl Game {
             }
 
             thread::sleep(Duration::from_millis(42));
-            self.renderer.render(&self.maze, &self.state);
+            self.renderer
+                .render(&self.maze, &*self.generator, &self.state);
         }
 
         Ok(())
