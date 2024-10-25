@@ -2,6 +2,5 @@
 pub enum GameState {
     Generating,
     Resolving,
-    Displaying,
-    Complete,
+    Solved,
 }

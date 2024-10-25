@@ -1,11 +1,13 @@
-use super::canvas::GameCanvas;
+use super::{canvas::GameCanvas, cell::Cell};
 use crate::{
     helpers::color::colors,
-    model::{generator::traits::MazeGenerator, maze::Maze, state::GameState},
+    model::{
+        generator::traits::MazeGenerator, maze::Maze, solver::traits::MazeSolver, state::GameState,
+    },
     utils::drawing_params::DrawingParams,
 };
 use sdl2::{pixels::Color, rect::Rect};
-use std::{cell::RefCell, rc::Rc};
+use std::{cell::RefCell, path, rc::Rc};
 
 pub struct Renderer {
     base_color: Color,
@@ -60,9 +62,41 @@ impl Renderer {
         game_canvas.canvas.present();
     }
 
-    pub fn render(&self, maze: &Maze, generator: &dyn MazeGenerator, state: &GameState) {
+    pub fn render_solution(&self, maze: &Maze, solver: &dyn MazeSolver) {
+        let mut game_canvas = self.game_canvas.borrow_mut();
+
+        game_canvas.canvas.set_draw_color(colors::BACKGROUND_COLOR);
+        game_canvas.canvas.clear();
+
+        let solution_path = solver.get_path();
+
+        for cell in &maze.grid {
+            if let Ok(cell_ref) = cell.try_borrow() {
+                let stroke = colors::FOREGROUND;
+                let mut fill = colors::BACKGROUND_COLOR;
+
+                // Check if the cell is part of the solution path
+                if solution_path.contains(cell) {
+                    fill = colors::ACCENT;
+                }
+
+                cell_ref.draw(&mut game_canvas, &self.drawing_params, stroke, fill);
+            }
+        }
+
+        game_canvas.canvas.present();
+    }
+
+    pub fn render(
+        &self,
+        maze: &Maze,
+        generator: &dyn MazeGenerator,
+        solver: &dyn MazeSolver,
+        state: &GameState,
+    ) {
         match state {
             GameState::Generating => self.render_generation(maze, generator),
+            GameState::Solved => self.render_solution(maze, solver),
             _ => {}
         }
     }

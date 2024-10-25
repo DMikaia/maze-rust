@@ -82,13 +82,19 @@ impl Game {
                         self.state = GameState::Resolving;
                     }
                 }
-                GameState::Resolving => {}
+                GameState::Resolving => {
+                    let start = self.maze.grid[0].clone();
+                    let end = (self.maze.size - 1, self.maze.size - 1);
+                    if self.solver.solve(start, end, &self.maze) {
+                        self.state = GameState::Solved;
+                    }
+                }
                 _ => {}
             }
 
             thread::sleep(Duration::from_millis(42));
             self.renderer
-                .render(&self.maze, &*self.generator, &self.state);
+                .render(&self.maze, &*self.generator, &*self.solver, &self.state);
         }
 
         Ok(())

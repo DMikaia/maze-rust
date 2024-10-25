@@ -5,7 +5,7 @@ use sdl2::{
 };
 use std::{cell::RefCell, rc::Rc};
 
-#[derive(Clone)]
+#[derive(Clone, PartialEq, Eq)]
 pub struct Cell {
     pub i: usize,
     pub j: usize,
@@ -100,5 +100,9 @@ impl Cell {
 
     pub fn set_visited(&mut self) {
         self.visited = true;
+    }
+
+    pub fn get_walls(&self) -> [bool; 4] {
+        self.walls.clone()
     }
 }

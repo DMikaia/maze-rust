@@ -1,4 +1,8 @@
-use crate::{model::maze::Maze, view::cell::Cell};
+use crate::{
+    helpers::position::in_bounds,
+    model::maze::{neighbor, Maze},
+    view::cell::Cell,
+};
 use std::{cell::RefCell, rc::Rc};
 
 use super::traits::MazeSolver;
@@ -12,7 +16,7 @@ impl DfsSolver {
     pub fn new(size: usize) -> Self {
         Self {
             path: Vec::new(),
-            visited: Vec::with_capacity(size),
+            visited: vec![false; size * size],
         }
     }
 
@@ -31,33 +35,23 @@ impl DfsSolver {
             return true;
         }
 
-        let neighbors = maze.get_all_neighbor_position(x, y);
-        for (new_x, new_y) in neighbors {
-            let new_index = maze.get_index(new_x, new_y);
-            let new_neighbor = maze.grid[new_index].clone();
-
-            if self.dfs(new_neighbor, end, maze) {
+        for neighbor in maze.get_valid_neighbors(current.clone()) {
+            if self.dfs(neighbor.clone(), end, maze) {
                 return true;
             }
         }
 
         self.path.pop();
-
         false
     }
 }
 
 impl MazeSolver for DfsSolver {
-    fn solve(
-        &mut self,
-        start: Rc<RefCell<Cell>>,
-        end: (usize, usize),
-        maze: &Maze,
-    ) -> Option<Vec<Rc<RefCell<Cell>>>> {
-        if self.dfs(start.clone(), end, maze) {
-            Some(self.path.clone())
-        } else {
-            None
-        }
+    fn solve(&mut self, start: Rc<RefCell<Cell>>, end: (usize, usize), maze: &Maze) -> bool {
+        self.dfs(start.clone(), end, maze)
+    }
+
+    fn get_path(&self) -> Vec<Rc<RefCell<Cell>>> {
+        self.path.clone()
     }
 }
