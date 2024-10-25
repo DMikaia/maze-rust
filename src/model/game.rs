@@ -9,7 +9,12 @@ use crate::{
     view::{canvas::GameCanvas, renderer::Renderer},
 };
 use sdl2::{event::Event, rect::Rect, EventPump};
-use std::{cell::RefCell, rc::Rc, thread, time::Duration};
+use std::{
+    cell::RefCell,
+    rc::Rc,
+    thread,
+    time::{Duration, Instant},
+};
 
 pub struct Game {
     event_queue: EventPump,
@@ -72,6 +77,8 @@ impl Game {
 
     pub fn run(&mut self) -> Result<(), String> {
         let mut running = true;
+        let mut next_state: Option<GameState> = None; // Track the next state to transition to
+        let mut state_timer = Instant::now();
 
         while running {
             self.process_events(&mut running);
@@ -79,22 +86,40 @@ impl Game {
             match self.state {
                 GameState::Generating => {
                     if !self.generator.generate(&self.maze) {
-                        self.state = GameState::Resolving;
+                        next_state = Some(GameState::Resolving);
+                        self.state = GameState::Paused;
+                        state_timer = Instant::now();
                     }
                 }
                 GameState::Resolving => {
-                    let start = self.maze.grid[0].clone();
-                    let end = (self.maze.size - 1, self.maze.size - 1);
-                    if self.solver.solve(start, end, &self.maze) {
-                        self.state = GameState::Solved;
+                    if !self.solver.is_initialized() {
+                        let start = self.maze.grid[0].clone();
+                        let end = (self.maze.size - 1, self.maze.size - 1);
+
+                        self.solver.init(start, end);
+                    }
+
+                    if self.solver.solve(&self.maze) && self.solver.is_solved() {
+                        if self.solver.is_solved() {
+                            next_state = Some(GameState::Solved);
+                            self.state = GameState::Paused;
+                            state_timer = Instant::now();
+                        }
                     }
                 }
-                _ => {}
+                GameState::Paused => {
+                    if state_timer.elapsed() >= Duration::from_millis(100) {
+                        if let Some(new_state) = next_state.take() {
+                            self.state = new_state;
+                        }
+                    }
+                }
+                GameState::Solved => {}
             }
 
-            thread::sleep(Duration::from_millis(42));
             self.renderer
                 .render(&self.maze, &*self.generator, &*self.solver, &self.state);
+            thread::sleep(Duration::from_millis(42));
         }
 
         Ok(())

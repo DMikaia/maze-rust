@@ -17,14 +17,20 @@ impl DfsGenerator {
 
 impl MazeGenerator for DfsGenerator {
     fn generate(&mut self, maze: &Maze) -> bool {
-        while !self.stack.is_empty() {
-            let current = self.stack.pop().unwrap();
+        if self.stack.is_empty() {
+            return false;
+        }
 
-            let mut current_cell = current.borrow_mut();
+        let current = self.stack.pop().unwrap();
+        let mut current_cell = current.borrow_mut();
+
+        if !current_cell.is_visited() {
             current_cell.set_visited();
+        }
 
-            if let Some(next) = maze.get_random_neighbor(current_cell.i, current_cell.j) {
-                let mut next_cell = next.borrow_mut();
+        if let Some(next) = maze.get_random_neighbor(current_cell.i, current_cell.j) {
+            let mut next_cell = next.borrow_mut();
+            if !next_cell.is_visited() {
                 next_cell.set_visited();
 
                 self.stack.push(current.clone());
@@ -32,14 +38,10 @@ impl MazeGenerator for DfsGenerator {
                 maze.remove_wall(&mut current_cell, &mut next_cell);
 
                 self.stack.push(next.clone());
-            } else {
-                self.stack.pop();
             }
-
-            return true;
         }
 
-        false
+        true
     }
 
     fn get_current_cell(&self) -> Option<Rc<RefCell<Cell>>> {

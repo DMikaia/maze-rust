@@ -90,6 +90,10 @@ impl Cell {
         self.visited = true;
     }
 
+    pub fn is_visited(&self) -> bool {
+        self.visited
+    }
+
     pub fn get_walls(&self) -> [bool; 4] {
         self.walls.clone()
     }

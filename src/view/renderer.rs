@@ -92,7 +92,7 @@ impl Renderer {
     ) {
         match state {
             GameState::Generating => self.render_generation(maze, generator),
-            GameState::Solved => self.render_solution(maze, solver),
+            GameState::Resolving => self.render_solution(maze, solver),
             _ => {}
         }
     }
