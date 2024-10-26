@@ -1,5 +1,5 @@
 use super::{
-    generator::{dfs::DfsGenerator, traits::MazeGenerator},
+    generator::traits::MazeGenerator,
     maze::Maze,
     solver::{dfs::DfsSolver, traits::MazeSolver},
     state::GameState,
@@ -43,6 +43,8 @@ fn adjust_screen_size(screen_size: (u32, u32), cell: u32) -> (u32, u32) {
 impl Game {
     pub fn new(
         cell: u32,
+        maze: Maze,
+        generator: Box<dyn MazeGenerator>,
         sdl_context: &sdl2::Sdl,
         screen_size: (u32, u32),
     ) -> Result<Self, String> {
@@ -61,8 +63,6 @@ impl Game {
             Rc::clone(&game_canvas),
         );
 
-        let maze = Maze::new(cell as usize);
-        let generator = Box::new(DfsGenerator::new(maze.grid[0].clone()));
         let solver = Box::new(DfsSolver::new(cell as usize));
 
         Ok(Game {
@@ -77,7 +77,7 @@ impl Game {
 
     pub fn run(&mut self) -> Result<(), String> {
         let mut running = true;
-        let mut next_state: Option<GameState> = None; // Track the next state to transition to
+        let mut next_state: Option<GameState> = None;
         let mut state_timer = Instant::now();
 
         while running {
@@ -93,8 +93,8 @@ impl Game {
                 }
                 GameState::Resolving => {
                     if !self.solver.is_initialized() {
-                        let start = self.maze.grid[0].clone();
-                        let end = (self.maze.size - 1, self.maze.size - 1);
+                        let start = self.maze.grid[self.maze.start].clone();
+                        let end = (self.maze.end, self.maze.end);
 
                         self.solver.init(start, end);
                     }

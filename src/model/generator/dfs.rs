@@ -8,9 +8,9 @@ pub struct DfsGenerator {
 }
 
 impl DfsGenerator {
-    pub fn new(starting: Rc<RefCell<Cell>>) -> Self {
+    pub fn new(maze: &Maze) -> Self {
         Self {
-            stack: vec![Rc::clone(&starting)],
+            stack: vec![maze.grid[maze.start].clone()],
         }
     }
 }

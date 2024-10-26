@@ -7,6 +7,8 @@ use std::{cell::RefCell, rc::Rc};
 pub struct Maze {
     pub grid: Vec<Rc<RefCell<Cell>>>,
     pub size: usize,
+    pub start: usize,
+    pub end: usize,
 }
 
 impl Maze {
@@ -19,6 +21,11 @@ impl Maze {
             })
             .collect();
 
-        Self { grid, size }
+        Self {
+            grid,
+            size,
+            start: 0,
+            end: size - 1,
+        }
     }
 }

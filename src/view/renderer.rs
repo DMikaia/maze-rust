@@ -45,10 +45,14 @@ impl Renderer {
                 let stroke = colors::FOREGROUND;
                 let mut fill = colors::BACKGROUND_COLOR;
 
-                if let Some(current) = generator.get_current_cell() {
-                    if Rc::ptr_eq(&cell, &current) {
+                if Rc::eq(&cell, &maze.grid[maze.start]) {
+                    fill = Color::GREEN;
+                } else if let Some(current) = generator.get_current_cell() {
+                    if Rc::eq(&current, cell) {
                         fill = colors::PRIMARY_COLOR;
                     }
+                } else if Rc::eq(&cell, &maze.grid[maze.get_index(maze.end, maze.end)]) {
+                    fill = Color::RED;
                 }
 
                 cell_ref.draw(&mut game_canvas, self.cell_size, stroke, fill);
@@ -71,9 +75,12 @@ impl Renderer {
                 let stroke = colors::FOREGROUND;
                 let mut fill = colors::BACKGROUND_COLOR;
 
-                // Check if the cell is part of the solution path
-                if solution_path.contains(cell) {
+                if Rc::eq(&cell, &maze.grid[maze.start]) {
+                    fill = Color::GREEN;
+                } else if solution_path.contains(cell) {
                     fill = colors::ACCENT;
+                } else if Rc::eq(&cell, &maze.grid[maze.get_index(maze.end, maze.end)]) {
+                    fill = Color::RED;
                 }
 
                 cell_ref.draw(&mut game_canvas, self.cell_size, stroke, fill);

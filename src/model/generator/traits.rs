@@ -1,5 +1,4 @@
-use crate::model::maze::Maze;
-use crate::view::cell::Cell;
+use crate::{model::maze::Maze, view::cell::Cell};
 use std::{cell::RefCell, rc::Rc};
 
 pub trait MazeGenerator {
