@@ -49,29 +49,6 @@ impl KruskalGenerator {
             current_index: None,
         }
     }
-
-    fn remove_wall(&self, maze: &Maze, i1: usize, j1: usize, i2: usize, j2: usize) {
-        let mut cell_1 = maze.grid[i1 * maze.size + j1].borrow_mut();
-        let mut cell_2 = maze.grid[i2 * maze.size + j2].borrow_mut();
-
-        if i1 == i2 {
-            if j1 < j2 {
-                cell_1.remove_cell_wall(1);
-                cell_2.remove_cell_wall(3);
-            } else {
-                cell_1.remove_cell_wall(3);
-                cell_2.remove_cell_wall(1);
-            }
-        } else {
-            if i1 < i2 {
-                cell_1.remove_cell_wall(2);
-                cell_2.remove_cell_wall(0);
-            } else {
-                cell_1.remove_cell_wall(0);
-                cell_2.remove_cell_wall(2);
-            }
-        }
-    }
 }
 
 impl MazeGenerator for KruskalGenerator {
@@ -87,7 +64,10 @@ impl MazeGenerator for KruskalGenerator {
         self.current_index = Some(maze.grid[index_1].clone());
 
         if self.uf.find(index_1) != self.uf.find(index_2) {
-            self.remove_wall(maze, i1, j1, i2, j2);
+            let mut cell_1 = maze.grid[index_1].borrow_mut();
+            let mut cell_2 = maze.grid[index_2].borrow_mut();
+
+            maze.remove_wall(&mut cell_1, &mut cell_2);
             self.uf.union(index_1, index_2);
         }
 

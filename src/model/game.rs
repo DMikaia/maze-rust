@@ -94,9 +94,9 @@ impl Game {
                 GameState::Resolving => {
                     if !self.solver.is_initialized() {
                         let start = self.maze.grid[self.maze.start].clone();
-                        let end = (self.maze.end, self.maze.end);
+                        let end = self.maze.grid[self.maze.end].clone();
 
-                        self.solver.init(start, end);
+                        self.solver.init(start, (end.borrow().i, end.borrow().j));
                     }
 
                     if self.solver.solve(&self.maze) && self.solver.is_solved() {

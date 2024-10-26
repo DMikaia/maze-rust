@@ -1,5 +1,7 @@
 use crate::model::{
-    generator::{dfs::DfsGenerator, kruskal::KruskalGenerator, traits::MazeGenerator},
+    generator::{
+        dfs::DfsGenerator, kruskal::KruskalGenerator, prim::PrimGenerator, traits::MazeGenerator,
+    },
     maze::Maze,
 };
 use std::io::stdin;
@@ -19,7 +21,7 @@ pub fn cell_number() -> u32 {
 }
 
 pub fn get_generator(maze: &Maze) -> Box<dyn MazeGenerator> {
-    println!("Choose your generator (1: DFS or 2: Kruskal): ");
+    println!("Choose your generator (1: DFS || 2: Kruskal || 3: Prim): ");
 
     let mut input: String = String::new();
 
@@ -32,7 +34,9 @@ pub fn get_generator(maze: &Maze) -> Box<dyn MazeGenerator> {
 
     if choice == 1 {
         Box::new(DfsGenerator::new(maze))
-    } else {
+    } else if choice == 2 {
         Box::new(KruskalGenerator::new(maze))
+    } else {
+        Box::new(PrimGenerator::new(maze))
     }
 }

@@ -45,19 +45,28 @@ impl Renderer {
                 let stroke = colors::FOREGROUND;
                 let mut fill = colors::BACKGROUND_COLOR;
 
-                if Rc::eq(&cell, &maze.grid[maze.start]) {
-                    fill = Color::GREEN;
-                } else if let Some(current) = generator.get_current_cell() {
+                if let Some(current) = generator.get_current_cell() {
                     if Rc::eq(&current, cell) {
                         fill = colors::PRIMARY_COLOR;
                     }
-                } else if Rc::eq(&cell, &maze.grid[maze.get_index(maze.end, maze.end)]) {
-                    fill = Color::RED;
                 }
 
                 cell_ref.draw(&mut game_canvas, self.cell_size, stroke, fill);
             }
         }
+
+        maze.grid[maze.start].borrow().draw(
+            &mut game_canvas,
+            self.cell_size,
+            colors::FOREGROUND,
+            Color::GREEN,
+        );
+        maze.grid[maze.end].borrow().draw(
+            &mut game_canvas,
+            self.cell_size,
+            colors::FOREGROUND,
+            Color::RED,
+        );
 
         game_canvas.canvas.present();
     }
@@ -75,17 +84,26 @@ impl Renderer {
                 let stroke = colors::FOREGROUND;
                 let mut fill = colors::BACKGROUND_COLOR;
 
-                if Rc::eq(&cell, &maze.grid[maze.start]) {
-                    fill = Color::GREEN;
-                } else if solution_path.contains(cell) {
+                if solution_path.contains(cell) {
                     fill = colors::ACCENT;
-                } else if Rc::eq(&cell, &maze.grid[maze.get_index(maze.end, maze.end)]) {
-                    fill = Color::RED;
                 }
 
                 cell_ref.draw(&mut game_canvas, self.cell_size, stroke, fill);
             }
         }
+
+        maze.grid[maze.start].borrow().draw(
+            &mut game_canvas,
+            self.cell_size,
+            colors::FOREGROUND,
+            Color::GREEN,
+        );
+        maze.grid[maze.end].borrow().draw(
+            &mut game_canvas,
+            self.cell_size,
+            colors::FOREGROUND,
+            Color::RED,
+        );
 
         game_canvas.canvas.present();
     }
