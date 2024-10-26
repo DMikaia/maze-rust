@@ -1,12 +1,7 @@
-use rand::{thread_rng, Rng};
-
-use crate::{
-    model::maze::{cell, Maze},
-    view::cell::Cell,
-};
-use std::{cell::RefCell, rc::Rc};
-
 use super::traits::MazeGenerator;
+use crate::{model::maze::Maze, view::cell::Cell};
+use rand::{thread_rng, Rng};
+use std::{cell::RefCell, rc::Rc};
 
 pub struct PrimGenerator {
     current: Option<Rc<RefCell<Cell>>>,
